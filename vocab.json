@@ -1,0 +1,140 @@
+{
+  "@context": {
+    "dc": "http://purl.org/dc/elements/1.1/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+  },
+  "@graph": [
+    {
+      "@id": "dc:contributor",
+      "@type": "rdf:Property",
+      "rdfs:label": {
+        "@language": "en",
+        "@value": "Contributor"
+      }
+    },
+    {
+      "@id": "dc:source",
+      "@type": "rdf:Property",
+      "rdfs:label": {
+        "@language": "en",
+        "@value": "Source"
+      }
+    },
+    {
+      "@id": "dc:language",
+      "@type": "rdf:Property",
+      "rdfs:label": {
+        "@language": "en",
+        "@value": "Language"
+      }
+    },
+    {
+      "@id": "dc:creator",
+      "@type": "rdf:Property",
+      "rdfs:label": {
+        "@language": "en",
+        "@value": "Creator"
+      }
+    },
+    {
+      "@id": "dc:type",
+      "@type": "rdf:Property",
+      "rdfs:label": {
+        "@language": "en",
+        "@value": "Type"
+      }
+    },
+    {
+      "@id": "dc:title",
+      "@type": "rdf:Property",
+      "rdfs:label": [{
+        "@language": "en",
+        "@value": "Title"
+      },{
+        "@language": "de",
+        "@value": "Titel"
+      }]
+    },
+    {
+      "@id": "dc:coverage",
+      "@type": "rdf:Property",
+      "rdfs:label": {
+        "@language": "en",
+        "@value": "Coverage"
+      }
+    },
+    {
+      "@id": "dc:format",
+      "@type": "rdf:Property",
+      "rdfs:label": {
+        "@language": "en",
+        "@value": "Format"
+      }
+    },
+    {
+      "@id": "dc:relation",
+      "@type": "rdf:Property",
+      "rdfs:label": {
+        "@language": "en",
+        "@value": "Relation"
+      }
+    },
+    {
+      "@id": "dc:date",
+      "@type": "rdf:Property",
+      "rdfs:label": {
+        "@language": "en",
+        "@value": "Date"
+      }
+    },
+    {
+      "@id": "dc:identifier",
+      "@type": "rdf:Property",
+      "rdfs:label": {
+        "@language": "en",
+        "@value": "Identifier"
+      }
+    },
+    {
+      "@id": "dc:publisher",
+      "@type": "rdf:Property",
+      "rdfs:label": {
+        "@language": "en",
+        "@value": "Publisher"
+      }
+    },
+    {
+      "@id": "dc:subject",
+      "@type": "rdf:Property",
+      "rdfs:label": {
+        "@language": "en",
+        "@value": "Subject"
+      }
+    },
+    {
+      "@id": "dc:description",
+      "@type": "rdf:Property",
+      "rdfs:label": {
+        "@language": "en",
+        "@value": "Description"
+      }
+    },
+    {
+      "@id": "dc:rights",
+      "@type": "rdf:Property",
+      "rdfs:label": {
+        "@language": "en",
+        "@value": "Rights"
+      }
+    },
+    {
+      "@id": "http://rdf.ebi.ac.uk/terms/chembl#organismName",
+      "@type": "rdf:Property",
+      "rdfs:label": {
+        "@language": "de",
+        "@value": "Rights"
+      }
+    }
+  ]
+}

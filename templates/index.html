@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+ <head>
+   <script id="vocab" type="application/ld+json">{{{vocab}}}</script>
+   <script id="data" type="application/ld+json">{{{graph}}}</script>
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+   <link rel="stylesheet" href="/css/custom.css">
+
+   <script src="https://cdn.jsdelivr.net/g/es6-promise@1.0.0"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jsonld/0.4.11/jsonld.js"></script>
+   <script src="https://unpkg.com/react@0.12/dist/react.min.js"></script>
+ </head>
+ <body>
+  <div id="header">Trifid</div>
+
+  <div class="container" id="graph"></div>
+
+  <div id="footer">
+   <table align="center" width="30%">
+    <tbody><tr>
+      <td colspan="2">Powered by</td>
+     </tr>
+     <tr>
+      <td><a href="http://zazuko.com"><img src="/img/zazuko-logo.png" width="150px"></a></td>
+      <td><a href="http://synapta.it"><img src="/img/synapta-logo.svg" width="150px"></a></td>
+     </tr>
+    </tbody>
+   </table>
+   <br>
+   Code on <a href="https://github.com/zazuko/trifid" style="color:white"><b>github</b></a>
+  </div>
+
+  <script src="/js/render-ld.js"></script>
+ </body>
+</html>
