@@ -73,6 +73,60 @@ function renderNode (node, label) {
   }
 }
 
+var JsonLdTitle = React.createClass({
+  render: function () {
+    var subject = this.props.graph.filter(function (subject) {
+      return subject['@id'] === window.location.href
+    }).shift()
+
+    if (!subject) {
+      return React.DOM.div({})
+    }
+
+    var title = this.props.predicates.reduce(function (title, predicate) {
+      return title || predicate in subject ? subject[predicate][0]['@value'] : null
+    }, null)
+
+    if (!title) {
+      return React.DOM.div({})
+    }
+
+    return React.DOM.h1({}, title)
+  }
+})
+
+var createJsonLdTitle = React.createFactory(JsonLdTitle)
+
+var JsonLdSticky = React.createClass({
+  render: function () {
+    var resource = React.DOM.h4({className: 'list-group-item-heading'}, 'Resource: ' + window.location.href)
+
+    var subject = this.props.graph.filter(function (subject) {
+      return subject['@id'] === window.location.href
+    }).shift()
+
+    var typeElements = []
+
+    if (subject && subject['@type']) {
+      typeElements.push('a ')
+
+      subject['@type'].forEach(function (type, index, types) {
+        typeElements.push(React.DOM.a({href: type}, type))
+
+        if (index !== types.length - 1) {
+          typeElements.push(', ')
+        }
+      })
+    }
+
+    var type = React.DOM.p({className: 'list-group-item-text'}, typeElements)
+
+    return React.DOM.span({className: 'list-group-item'}, resource, type)
+  }
+})
+
+var createJsonLdSticky = React.createFactory(JsonLdSticky)
+
 var JsonLdSubjectTable = React.createClass({
   render: function () {
     var subjects = this.props.subject
@@ -181,8 +235,13 @@ Promise.all([
   var vocab = results[0]
   var graph = results[1]
 
-  var tables = createJsonLdTables({graph: graph, vocab: vocab})
+  var title = createJsonLdTitle({graph: graph, predicates: ['http://schema.org/name']})
+  React.render(title, document.getElementById('title'))
 
+  var sticky = createJsonLdSticky({graph: graph})
+  React.render(sticky, document.getElementById('sticky'))
+
+  var tables = createJsonLdTables({graph: graph, vocab: vocab})
   React.render(tables, document.getElementById('graph'))
 }).catch(function (error) {
   console.error(error)
