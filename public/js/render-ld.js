@@ -35,6 +35,17 @@ var predicateLabel = function (iri, vocab) {
   return iriLabel(iri)
 }
 
+function renderPredicate (iri, label) {
+  return React.DOM.a({
+    href: iri,
+    style: {
+      'background-color': '#FFFFFF',
+      'color': '#000000',
+      'text-decoration': 'none'
+    }
+  }, React.DOM.b({}, label || iri))
+}
+
 function renderIri (iri, label) {
   return React.DOM.a({href: iri}, label || iri)
 }
@@ -133,14 +144,15 @@ var JsonLdSubjectTable = React.createClass({
     var vocab = this.props.vocab
     var rows = []
 
-    var head = React.DOM.thead({},
-      React.DOM.tr({},
-        React.DOM.th({colSpan: 2, style: {textAlign: 'center'}}, 'subject: ', renderNode(this.props.subject))),
-      React.DOM.tr({},
-        React.DOM.th({style: {width: '50%'}}, 'predicate'),
-        React.DOM.th({}, 'object')));
+    var head = React.DOM.thead({})
 
-    Object.keys(this.props.subject).forEach(function (predicate) {
+    if (subjects['@id'] !== window.location.href) {
+      head = React.DOM.thead({},
+        React.DOM.tr({},
+          React.DOM.th({colSpan: 2, style: {textAlign: 'center'}}, renderNode(this.props.subject))))
+    }
+
+    Object.keys(subjects).forEach(function (predicate) {
       var objects = subjects[predicate]
 
       if (predicate.indexOf('@') === 0) {
@@ -157,15 +169,22 @@ var JsonLdSubjectTable = React.createClass({
 
       objects.forEach(function (object) {
         rows.push(React.DOM.tr({key: predicate + JSON.stringify(object)},
-          React.DOM.td({}, renderIri(predicate, predicateLabel(predicate, vocab))),
-          React.DOM.td({}, renderNode(object, '@id' in object ? iriLabel(object['@id']) : null))
+          React.DOM.td({
+            width: '35%',
+            cellpadding: '.1em',
+            valign: 'top'
+          }, renderPredicate(predicate, predicateLabel(predicate, vocab))),
+          React.DOM.td({
+            width: '65%',
+            cellpadding: '.1em'
+          }, renderNode(object, '@id' in object ? iriLabel(object['@id']) : null), React.DOM.hr({}))
         ))
       })
     })
 
     var body = React.DOM.tbody({}, rows)
 
-    return React.DOM.table({className: 'table table-bordered', id: this.props.subject['@id']}, head, body)
+    return React.DOM.table({id: this.props.subject['@id'], width: '100%'}, head, body)
   }
 })
 
