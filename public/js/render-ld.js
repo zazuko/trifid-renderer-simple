@@ -165,14 +165,14 @@ var JsonLdSubjectTable = React.createClass({
       objects.forEach(function (object) {
         rows.push(React.DOM.tr({key: predicate + JSON.stringify(object)},
           React.DOM.td({className: 'table-predicate'}, renderPredicate(predicate, predicateLabel(predicate, vocab))),
-          React.DOM.td({className: 'table-object'}, renderNode(object, '@id' in object ? iriLabel(object['@id']) : null), React.DOM.hr({}))
+          React.DOM.td({className: 'table-object'}, renderNode(object, '@id' in object ? iriLabel(object['@id']) : null))
         ))
       })
     })
 
     var body = React.DOM.tbody({}, rows)
 
-    return React.DOM.table({id: this.props.subject['@id'], className: 'table-graph'}, head, body)
+    return React.DOM.table({id: this.props.subject['@id'], className: 'table table-striped table-graph'}, head, body)
   }
 })
 
