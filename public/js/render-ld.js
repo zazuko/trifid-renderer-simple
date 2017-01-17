@@ -172,7 +172,7 @@ var JsonLdSubjectTable = React.createClass({
 
     var body = React.DOM.tbody({}, rows)
 
-    return React.DOM.table({id: this.props.subject['@id']}, head, body)
+    return React.DOM.table({id: this.props.subject['@id'], className: 'table-graph'}, head, body)
   }
 })
 
