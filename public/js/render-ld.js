@@ -37,12 +37,7 @@ var predicateLabel = function (iri, vocab) {
 
 function renderPredicate (iri, label) {
   return React.DOM.a({
-    href: iri,
-    style: {
-      'background-color': '#FFFFFF',
-      'color': '#000000',
-      'text-decoration': 'none'
-    }
+    href: iri
   }, React.DOM.b({}, label || iri))
 }
 
@@ -110,7 +105,7 @@ var createJsonLdTitle = React.createFactory(JsonLdTitle)
 
 var JsonLdSticky = React.createClass({
   render: function () {
-    var resource = React.DOM.h4({className: 'list-group-item-heading'}, 'Resource: ' + window.location.href)
+    var resource = React.DOM.h3({className: 'list-group-item-heading'}, 'Resource: ' + window.location.href)
 
     var subject = this.props.graph.filter(function (subject) {
       return subject['@id'] === window.location.href
@@ -144,12 +139,12 @@ var JsonLdSubjectTable = React.createClass({
     var vocab = this.props.vocab
     var rows = []
 
-    var head = React.DOM.thead({})
+    var head = React.DOM.thead({className: 'table-subject'})
 
     if (subjects['@id'] !== window.location.href) {
       head = React.DOM.thead({},
         React.DOM.tr({},
-          React.DOM.th({colSpan: 2, style: {textAlign: 'center'}}, renderNode(this.props.subject))))
+          React.DOM.th({colSpan: 2}, renderNode(this.props.subject))))
     }
 
     Object.keys(subjects).forEach(function (predicate) {
@@ -169,22 +164,15 @@ var JsonLdSubjectTable = React.createClass({
 
       objects.forEach(function (object) {
         rows.push(React.DOM.tr({key: predicate + JSON.stringify(object)},
-          React.DOM.td({
-            width: '35%',
-            cellpadding: '.1em',
-            valign: 'top'
-          }, renderPredicate(predicate, predicateLabel(predicate, vocab))),
-          React.DOM.td({
-            width: '65%',
-            cellpadding: '.1em'
-          }, renderNode(object, '@id' in object ? iriLabel(object['@id']) : null), React.DOM.hr({}))
+          React.DOM.td({className: 'table-predicate'}, renderPredicate(predicate, predicateLabel(predicate, vocab))),
+          React.DOM.td({className: 'table-object'}, renderNode(object, '@id' in object ? iriLabel(object['@id']) : null), React.DOM.hr({}))
         ))
       })
     })
 
     var body = React.DOM.tbody({}, rows)
 
-    return React.DOM.table({id: this.props.subject['@id'], width: '100%'}, head, body)
+    return React.DOM.table({id: this.props.subject['@id']}, head, body)
   }
 })
 
