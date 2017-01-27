@@ -14,7 +14,29 @@ function iriLabel (iri) {
   return parts[parts.length - 1]
 }
 
-var predicateLabel = function (iri, vocab) {
+function subjectLabel (subject, predicates) {
+  return predicates.reduce(function (label, predicate) {
+    return label || predicate in subject ? subject[predicate][0]['@value'] : null
+  }, null)
+}
+
+function subjectSortId (subject, predicates) {
+  var label = subjectLabel(subject, predicates) || subject['@id']
+
+  if (subject['@id'].slice(0, 2) !== '_:') {
+    return '0' + label // IRIs
+  } else {
+    return '1' + label // blank nodes
+  }
+}
+
+function subjectSort (predicates) {
+  return function (a, b) {
+    return subjectSortId(a, predicates).localeCompare(subjectSortId(b, predicates))
+  }
+}
+
+function predicateLabel (iri, vocab) {
   var predicate = 'http://www.w3.org/2000/01/rdf-schema#label'
   var language = navigator.language || navigator.userLanguage
 
@@ -94,9 +116,7 @@ var JsonLdTitle = React.createClass({
       return React.DOM.div({})
     }
 
-    var title = this.props.predicates.reduce(function (title, predicate) {
-      return title || predicate in subject ? subject[predicate][0]['@value'] : null
-    }, null)
+    var title = subjectLabel(subject, this.props.labelPredicates)
 
     if (!title) {
       return React.DOM.div({})
@@ -194,16 +214,7 @@ var JsonLdTables = React.createClass({
   render: function () {
     var vocab = this.props.vocab
 
-    // move blank nodes to the end
-    var subjects = this.props.graph.sort(function (a, b) {
-      if (a['@id'].indexOf('_:') === 0 && b['@id'].indexOf('_:') !== 0) {
-        return 1
-      } else if (a['@id'].indexOf('_:') !== 0 && b['@id'].indexOf('_:') === 0) {
-        return -1
-      }
-
-      return a['@id'].localeCompare(b['@id'])
-    })
+    var subjects = this.props.graph.sort(subjectSort(this.props.labelPredicates))
 
     var tables = subjects.map(function (subject) {
       return createJsonLdSubjectTable({
@@ -253,14 +264,15 @@ Promise.all([
 ]).then(function (results) {
   var vocab = results[0]
   var graph = results[1]
+  var labelPredicates = ['http://schema.org/name']
 
-  var title = createJsonLdTitle({graph: graph, predicates: ['http://schema.org/name']})
+  var title = createJsonLdTitle({graph: graph, labelPredicates: labelPredicates})
   React.render(title, document.getElementById('title'))
 
   var sticky = createJsonLdSticky({graph: graph})
   React.render(sticky, document.getElementById('sticky'))
 
-  var tables = createJsonLdTables({graph: graph, vocab: vocab})
+  var tables = createJsonLdTables({graph: graph, vocab: vocab, labelPredicates: labelPredicates})
   React.render(tables, document.getElementById('graph'))
 }).catch(function (error) {
   console.error(error)
