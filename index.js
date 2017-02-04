@@ -22,6 +22,13 @@ function factory (options) {
 
   callback.accept = 'application/ld+json'
 
+  // add error renderer if options contain an error template
+  if (options.templateError) {
+    var templateError = fs.readFileSync(options.templateError).toString()
+
+    callback.error = render.bind(null, templateError, vocab)
+  }
+
   return callback
 }
 
