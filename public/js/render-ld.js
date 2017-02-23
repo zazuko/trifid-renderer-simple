@@ -228,7 +228,14 @@ function embeddedJsonLd () {
   var json = JSON.parse(element.innerHTML)
 
   return jsonld.promises.flatten(json, {}).then(function (flat) {
-    return jsonld.promises.expand(flat)
+    return jsonld.promises.expand(flat).then(function (json) {
+      // if data contains quads, use the first graph
+      if (json.length && '@graph' in json[0]) {
+        json = json[0]['@graph']
+      }
+
+      return json
+    })
   })
 }
 
