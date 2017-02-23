@@ -64,7 +64,14 @@ function renderPredicate (iri, label) {
 }
 
 function renderIri (iri, label) {
-  return React.DOM.a({href: iri}, label || iri)
+  var origin = window.location.origin
+
+  // open IRIs with the same origin in the same tab, all others in a new tab
+  if (iri.slice(0, origin.length) === origin) {
+    return React.DOM.a({href: iri}, label || iri)
+  } else {
+    return React.DOM.a({href: iri, target: '_blank'}, label || iri)
+  }
 }
 
 function renderBlankNode (blankNode) {
