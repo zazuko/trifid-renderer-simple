@@ -4,6 +4,22 @@
 
 var termRegEx = /(#|\/)([^#\/]*)$/
 
+var LinkClass = React.createClass({
+  render: function () {
+    var iri = this.props.href
+    var origin = window.location.origin
+
+    // open IRIs with the same origin in the same tab, all others in a new tab
+    if (iri.slice(0, origin.length) === origin) {
+      return React.DOM.a({href: iri}, this.props.children)
+    } else {
+      return React.DOM.a({href: iri, target: '_blank'}, this.props.children)
+    }
+  }
+})
+
+var link = React.createFactory(LinkClass)
+
 function iriLabel (iri) {
   var parts = termRegEx.exec(iri)
 
@@ -58,20 +74,11 @@ function predicateLabel (iri, vocab) {
 }
 
 function renderPredicate (iri, label) {
-  return React.DOM.a({
-    href: iri
-  }, React.DOM.b({}, label || iri))
+  return link({href: iri}, React.DOM.b({}, label || iri))
 }
 
 function renderIri (iri, label) {
-  var origin = window.location.origin
-
-  // open IRIs with the same origin in the same tab, all others in a new tab
-  if (iri.slice(0, origin.length) === origin) {
-    return React.DOM.a({href: iri}, label || iri)
-  } else {
-    return React.DOM.a({href: iri, target: '_blank'}, label || iri)
-  }
+  return link({href: iri}, label || iri)
 }
 
 function renderBlankNode (blankNode) {
@@ -144,7 +151,7 @@ var JsonLdSticky = React.createClass({
       typeElements.push('a ')
 
       subject['@type'].forEach(function (type, index, types) {
-        typeElements.push(React.DOM.a({href: type}, type))
+        typeElements.push(link({href: type}, type))
 
         if (index !== types.length - 1) {
           typeElements.push(', ')
