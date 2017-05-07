@@ -139,7 +139,7 @@ var createJsonLdTitle = React.createFactory(JsonLdTitle)
 
 var JsonLdSticky = React.createClass({
   render: function () {
-    var resource = React.DOM.h3({className: 'list-group-item-heading'}, 'Resource: ' + window.location.href)
+    var resource = React.DOM.h4({}, window.location.href)
 
     var subject = this.props.graph.filter(function (subject) {
       return subject['@id'] === window.location.href
@@ -159,9 +159,9 @@ var JsonLdSticky = React.createClass({
       })
     }
 
-    var type = React.DOM.p({className: 'list-group-item-text'}, typeElements)
+    var type = React.DOM.p({}, typeElements)
 
-    return React.DOM.span({className: 'list-group-item'}, resource, type)
+    return React.DOM.span({}, resource, type)
   }
 })
 
