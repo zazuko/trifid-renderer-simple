@@ -1,24 +1,7 @@
-/* global React */
+/* global jsonld */
 
-'use strict'
-
-var termRegEx = /(#|\/)([^#\/]*)$/
-
-var LinkClass = React.createClass({
-  render: function () {
-    var iri = this.props.href
-    var origin = window.location.origin
-
-    // open IRIs with the same origin in the same tab, all others in a new tab
-    if (iri.slice(0, origin.length) === origin) {
-      return React.DOM.a({href: iri}, this.props.children)
-    } else {
-      return React.DOM.a({href: iri, target: '_blank'}, this.props.children)
-    }
-  }
-})
-
-var link = React.createFactory(LinkClass)
+var termRegEx = new RegExp('(#|/)([^#/]*)$')
+var titlePredicates = ['http://schema.org/name']
 
 function iriLabel (iri) {
   var parts = termRegEx.exec(iri)
@@ -30,14 +13,14 @@ function iriLabel (iri) {
   return parts[parts.length - 1]
 }
 
-function subjectLabel (subject, predicates) {
-  return predicates.reduce(function (label, predicate) {
-    return label || predicate in subject ? subject[predicate][0]['@value'] : null
+function subjectLabel (subject, titlePredicates) {
+  return titlePredicates.reduce(function (label, titlePredicate) {
+    return label || titlePredicate in subject ? subject[titlePredicate][0]['@value'] : null
   }, null)
 }
 
-function subjectSortId (subject, predicates) {
-  var label = subjectLabel(subject, predicates) || subject['@id']
+function subjectSortId (subject, titlePredicates) {
+  var label = subjectLabel(subject, titlePredicates) || subject['@id']
 
   if (subject['@id'].slice(0, 2) !== '_:') {
     return '0' + label // IRIs
@@ -46,9 +29,9 @@ function subjectSortId (subject, predicates) {
   }
 }
 
-function subjectSort (predicates) {
+function subjectSort (titlePredicates) {
   return function (a, b) {
-    return subjectSortId(a, predicates).localeCompare(subjectSortId(b, predicates))
+    return subjectSortId(a, titlePredicates).localeCompare(subjectSortId(b, titlePredicates))
   }
 }
 
@@ -73,28 +56,85 @@ function predicateLabel (iri, vocab) {
   return iriLabel(iri)
 }
 
+function render (elementId, html) {
+  var element = document.getElementById(elementId)
+
+  if (element) {
+    element.innerHTML = html
+  }
+}
+
+function renderLink (iri, label) {
+  var origin = window.location.origin
+
+  // open IRIs with the same origin in the same tab, all others in a new tab
+  if (iri.slice(0, origin.length) === origin) {
+    return '<a href="' + iri + '">' + label + '</a>'
+  } else {
+    return '<a href="' + iri + '" target="_blank">' + label + '</a>'
+  }
+}
+
+function renderTitle (graph, titlePredicates) {
+  var subject = graph.filter(function (subject) {
+    return subject['@id'] === window.location.href
+  }).shift()
+
+  if (!subject) {
+    return ''
+  }
+
+  var title = subjectLabel(subject, titlePredicates)
+
+  if (!title) {
+    return ''
+  }
+
+  return '<h1>' + title + '</h1>'
+}
+
+function renderSticky (graph) {
+  var resource = '<h4>' + window.location.href + '</h4>'
+
+  var subject = graph.filter(function (subject) {
+    return subject['@id'] === window.location.href
+  }).shift()
+
+  var typeElements = ''
+
+  if (subject && subject['@type']) {
+    typeElements = 'a ' + subject['@type'].map(function (type) {
+      return renderLink(type, type)
+    }).join(', ')
+  }
+
+  var type = '<p>' + typeElements + '</p>'
+
+  return '<span>' + resource + type + '</span>'
+}
+
 function renderPredicate (iri, label) {
-  return link({href: iri}, React.DOM.b({}, label || iri))
+  return renderLink(iri, '<b>' + (label || iri) + '</b>')
 }
 
 function renderIri (iri, label) {
-  return link({href: iri}, label || iri)
+  return renderLink(iri, label || iri)
 }
 
 function renderBlankNode (blankNode) {
-  return React.DOM.a({href: '#' + blankNode}, blankNode)
+  return '<a href="#' + blankNode + '">' + blankNode + '</a>'
 }
 
 function renderLiteral (literal) {
   if (typeof literal === 'string') {
-    return React.DOM.span({}, literal)
+    return '<span>' + literal + '</span>'
   } else {
     if ('@language' in literal) {
-      return React.DOM.span({}, literal['@value'] + ' @' + literal['@language'])
+      return '<span>' + literal['@value'] + ' @' + literal['@language'] + '</span>'
     } else if ('@type' in literal) {
-      return React.DOM.span({}, literal['@value'] + ' (', renderIri(literal['@type'], iriLabel(literal['@type'])), ')')
+      return '<span>' + literal['@value'] + ' (' + renderIri(literal['@type'], iriLabel(literal['@type'])) + ')</span>'
     } else {
-      return React.DOM.span({}, literal['@value'].toString())
+      return '<span>' + literal['@value'] + '</span>'
     }
   }
 }
@@ -115,128 +155,55 @@ function renderNode (node, label) {
   }
 }
 
-var JsonLdTitle = React.createClass({
-  render: function () {
-    var subject = this.props.graph.filter(function (subject) {
-      return subject['@id'] === window.location.href
-    }).shift()
+function renderTable (subject, vocab) {
+  var head = '<thead class="table-subject"></thead>'
 
-    if (!subject) {
-      return React.DOM.div({})
-    }
-
-    var title = subjectLabel(subject, this.props.labelPredicates)
-
-    if (!title) {
-      return React.DOM.div({})
-    }
-
-    return React.DOM.h1({}, title)
+  if (subject['@id'] !== window.location.href) {
+    head = '<thead><tr><th colspan="2">' + renderNode(subject) + '</th></tr></thead>'
   }
-})
 
-var createJsonLdTitle = React.createFactory(JsonLdTitle)
+  var rows = Object.keys(subject).map(function (predicate) {
+    var objects = subject[predicate]
 
-var JsonLdSticky = React.createClass({
-  render: function () {
-    var resource = React.DOM.h4({}, window.location.href)
+    if (predicate.slice(0, 1) === '@') {
+      if (predicate === '@type') {
+        predicate = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'
 
-    var subject = this.props.graph.filter(function (subject) {
-      return subject['@id'] === window.location.href
-    }).shift()
-
-    var typeElements = []
-
-    if (subject && subject['@type']) {
-      typeElements.push('a ')
-
-      subject['@type'].forEach(function (type, index, types) {
-        typeElements.push(link({href: type}, type))
-
-        if (index !== types.length - 1) {
-          typeElements.push(', ')
-        }
-      })
-    }
-
-    var type = React.DOM.p({}, typeElements)
-
-    return React.DOM.span({}, resource, type)
-  }
-})
-
-var createJsonLdSticky = React.createFactory(JsonLdSticky)
-
-var JsonLdSubjectTable = React.createClass({
-  render: function () {
-    var subjects = this.props.subject
-    var vocab = this.props.vocab
-    var rows = []
-
-    var head = React.DOM.thead({className: 'table-subject'})
-
-    if (subjects['@id'] !== window.location.href) {
-      head = React.DOM.thead({},
-        React.DOM.tr({},
-          React.DOM.th({colSpan: 2}, renderNode(this.props.subject))))
-    }
-
-    Object.keys(subjects).forEach(function (predicate) {
-      var objects = subjects[predicate]
-
-      if (predicate.indexOf('@') === 0) {
-        if (predicate === '@type') {
-          predicate = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'
-
-          objects = objects.map(function (type) {
-            return {'@id': type};
-          })
-        } else {
-          return
-        }
+        objects = objects.map(function (type) {
+          return {'@id': type}
+        })
+      } else {
+        return
       }
+    }
 
-      objects.forEach(function (object) {
-        rows.push(React.DOM.tr({key: predicate + JSON.stringify(object)},
-          React.DOM.td({className: 'table-predicate col-lg-4'}, renderPredicate(predicate, predicateLabel(predicate, vocab))),
-          React.DOM.td({className: 'table-object col-lg-8'}, renderNode(object, '@id' in object ? iriLabel(object['@id']) : null))
-        ))
-      })
-    })
+    return objects.map(function (object) {
+      return '<tr>' +
+        '<td class="table-predicate col-lg-4">' + renderPredicate(predicate, predicateLabel(predicate, vocab)) + '</td>' +
+        '<td class="table-object col-lg-8">' + renderNode(object, '@id' in object ? iriLabel(object['@id']) : '') + '</td>' +
+        '</tr>'
+    }).join('')
+  }).join('')
 
-    var body = React.DOM.tbody({}, rows)
+  return '<table id="' + subject['@id'] + '" class="table table-striped table-graph">' +
+    head +
+    '<tbody>' + rows + '</tbody>' +
+    '</table>'
+}
 
-    return React.DOM.table({id: this.props.subject['@id'], className: 'table table-striped table-graph'}, head, body)
-  }
-})
+function renderTables (graph, vocab, titlePredicates) {
+  var subjects = graph.sort(subjectSort(titlePredicates))
 
-var createJsonLdSubjectTable = React.createFactory(JsonLdSubjectTable)
+  return subjects.map(function (subject) {
+    return renderTable(subject, vocab)
+  }).join('')
+}
 
-var JsonLdTables = React.createClass({
-  render: function () {
-    var vocab = this.props.vocab
-
-    var subjects = this.props.graph.sort(subjectSort(this.props.labelPredicates))
-
-    var tables = subjects.map(function (subject) {
-      return createJsonLdSubjectTable({
-        key: subject['@id'],
-        subject: subject,
-        vocab: vocab
-      })
-    })
-
-    return React.DOM.div({}, tables)
-  }
-})
-
-var createJsonLdTables = React.createFactory(JsonLdTables)
-
-function embeddedJsonLd () {
-  var element = document.getElementById('data')
+function embeddedGraph (elementId) {
+  var element = document.getElementById(elementId)
 
   if (!element) {
-    return Promise.reject()
+    return Promise.resolve({})
   }
 
   var json = JSON.parse(element.innerHTML)
@@ -253,36 +220,16 @@ function embeddedJsonLd () {
   })
 }
 
-function embeddedVocab () {
-  var element = document.getElementById('vocab')
-
-  if (!element) {
-    return Promise.resolve({})
-  }
-
-  var json = JSON.parse(element.innerHTML)
-
-  return jsonld.promises.expand(json)
-}
-
-var dcVocab = {}
-
 Promise.all([
-  embeddedVocab(),
-  embeddedJsonLd()
+  embeddedGraph('vocab'),
+  embeddedGraph('data')
 ]).then(function (results) {
   var vocab = results[0]
   var graph = results[1]
-  var labelPredicates = ['http://schema.org/name']
 
-  var title = createJsonLdTitle({graph: graph, labelPredicates: labelPredicates})
-  React.render(title, document.getElementById('title'))
-
-  var sticky = createJsonLdSticky({graph: graph})
-  React.render(sticky, document.getElementById('sticky'))
-
-  var tables = createJsonLdTables({graph: graph, vocab: vocab, labelPredicates: labelPredicates})
-  React.render(tables, document.getElementById('graph'))
+  render('title', renderTitle(graph, titlePredicates))
+  render('sticky', renderSticky(graph))
+  render('graph', renderTables(graph, vocab, titlePredicates))
 }).catch(function (error) {
   console.error(error)
 })
