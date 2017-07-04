@@ -228,7 +228,7 @@ Promise.all([
   var graph = results[1]
 
   render('title', renderTitle(graph, titlePredicates))
-  render('sticky', renderSticky(graph))
+  render('subtitle', renderSticky(graph))
   render('graph', renderTables(graph, vocab, titlePredicates))
 }).catch(function (error) {
   console.error(error)
