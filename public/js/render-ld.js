@@ -69,9 +69,9 @@ function renderLink (iri, label) {
 
   // open IRIs with the same origin in the same tab, all others in a new tab
   if (iri.slice(0, origin.length) === origin) {
-    return '<a href="' + iri + '">' + label + '</a>'
+    return '<a href="' + iri + '" title="' + iri + '">' + label + '</a>'
   } else {
-    return '<a href="' + iri + '" target="_blank">' + label + '</a>'
+    return '<a href="' + iri + '" title="' + iri + '" target="_blank">' + label + '</a>'
   }
 }
 
