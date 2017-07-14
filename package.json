@@ -16,8 +16,7 @@
     "test": "npm run lint"
   },
   "dependencies": {
-    "jsonld": "^0.4.12",
-    "mustache": "^2.3.0"
+    "jsonld": "^0.4.12"
   },
   "devDependencies": {
     "standard": "^8.6.0"

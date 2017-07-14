@@ -2,31 +2,29 @@
 
 var fs = require('fs')
 var jsonld = require('jsonld')
-var mustache = require('mustache')
 
-function render (template, context, vocab, locals) {
-  locals.vocab = JSON.stringify(vocab)
+function render (template, context, vocab, req, res) {
+  res.locals.statusCode = res.statusCode
+  res.locals.vocab = JSON.stringify(vocab)
 
   try {
-    locals.graph = JSON.parse(locals.graph)
+    res.locals.graph = JSON.parse(res.locals.graph)
   } catch (e) {
-    locals.graph = {}
+    res.locals.graph = {}
   }
 
-  return jsonld.promises.compact(locals.graph, context).then(function (compacted) {
-    locals.graph = JSON.stringify(compacted)
+  return jsonld.promises.compact(res.locals.graph, context).then(function (compacted) {
+    res.locals.graph = JSON.stringify(compacted)
 
-    return mustache.render(template, locals)
+    res.render(template)
   }).catch(function (err) {
     console.error(err.stack || err.message)
 
-    return mustache.render(template, locals)
+    res.render(template)
   })
 }
 
 function factory (options) {
-  var template = fs.readFileSync(options.template).toString()
-
   var context = {'@vocab': 'http://schema.org/'}
 
   if (options.context) {
@@ -39,15 +37,13 @@ function factory (options) {
     vocab = JSON.parse(fs.readFileSync(options.vocab).toString())
   }
 
-  var callback = render.bind(null, template, context, vocab)
+  var callback = render.bind(null, options.template, context, vocab)
 
   callback.accept = 'application/ld+json'
 
   // add error renderer if options contain an error template
   if (options.templateError) {
-    var templateError = fs.readFileSync(options.templateError).toString()
-
-    callback.error = render.bind(null, templateError, context, vocab)
+    callback.error = render.bind(null, options.templateError, context, vocab)
   }
 
   return callback
