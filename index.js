@@ -13,6 +13,10 @@ function render (template, context, vocab, req, res) {
     res.locals.graph = {}
   }
 
+  if (res.locals.jsonldContext) {
+    res.locals.graph['@context'] = res.locals.jsonldContext
+  }
+
   return jsonld.promises.compact(res.locals.graph, context).then(function (compacted) {
     res.locals.graph = JSON.stringify(compacted)
 
