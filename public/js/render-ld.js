@@ -1,7 +1,7 @@
 /* global jsonld */
 
 var termRegEx = new RegExp('(#|/)([^#/]*)$')
-var titlePredicates = ['http://schema.org/name']
+var titlePredicates = ['http://schema.org/name', 'http://schema.org/headline', 'http://purl.org/dc/terms/title', 'http://www.w3.org/2000/01/rdf-schema#label']
 
 function iriLabel (iri) {
   var parts = termRegEx.exec(iri)
@@ -15,7 +15,7 @@ function iriLabel (iri) {
 
 function subjectLabel (subject, titlePredicates) {
   return titlePredicates.reduce(function (label, titlePredicate) {
-    return label || titlePredicate in subject ? subject[titlePredicate][0]['@value'] : null
+    return label || (titlePredicate in subject ? subject[titlePredicate][0]['@value'] : null)
   }, null)
 }
 
