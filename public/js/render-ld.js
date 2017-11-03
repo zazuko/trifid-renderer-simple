@@ -15,7 +15,7 @@ function iriLabel (iri) {
 
 function subjectLabel (subject, titlePredicates) {
   return titlePredicates.reduce(function (label, titlePredicate) {
-    return label || titlePredicate in subject ? subject[titlePredicate][0]['@value'] : null
+    return label || (titlePredicate in subject ? subject[titlePredicate][0]['@value'] : null)
   }, null)
 }
 
