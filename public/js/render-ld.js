@@ -77,7 +77,7 @@ function renderLink (iri, label) {
 
 function renderTitle (graph, titlePredicates) {
   var subject = graph.filter(function (subject) {
-    return subject['@id'] === window.location.href
+    return subject['@id'] === decodeURIComponent(window.location.href)
   }).shift()
 
   if (!subject) {
@@ -94,10 +94,10 @@ function renderTitle (graph, titlePredicates) {
 }
 
 function renderSticky (graph) {
-  var resource = '<h4>' + window.location.href + '</h4>'
+  var resource = '<h4>' + decodeURIComponent(window.location.href) + '</h4>'
 
   var subject = graph.filter(function (subject) {
-    return subject['@id'] === window.location.href
+    return subject['@id'] === decodeURIComponent(window.location.href)
   }).shift()
 
   var typeElements = ''
@@ -158,7 +158,7 @@ function renderNode (node, label) {
 function renderTable (subject, vocab) {
   var head = '<thead class="table-subject"></thead>'
 
-  if (subject['@id'] !== window.location.href) {
+  if (subject['@id'] !== decodeURIComponent(window.location.href)) {
     head = '<thead><tr><th colspan="2">' + renderNode(subject) + '</th></tr></thead>'
   }
 
