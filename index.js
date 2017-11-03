@@ -3,9 +3,9 @@
 var fs = require('fs')
 var jsonld = require('jsonld')
 
-function render (template, context, vocab, req, res) {
+function render (template, options, req, res) {
   res.locals.statusCode = res.statusCode
-  res.locals.vocab = JSON.stringify(vocab)
+  res.locals.vocab = JSON.stringify(options.vocab || {})
 
   try {
     res.locals.graph = JSON.parse(res.locals.graph)
@@ -17,7 +17,7 @@ function render (template, context, vocab, req, res) {
     res.locals.graph['@context'] = res.locals.jsonldContext
   }
 
-  return jsonld.promises.compact(res.locals.graph, context).then(function (compacted) {
+  return jsonld.promises.compact(res.locals.graph, options.context).then(function (compacted) {
     res.locals.graph = JSON.stringify(compacted)
 
     res.render(template)
@@ -29,25 +29,23 @@ function render (template, context, vocab, req, res) {
 }
 
 function factory (options) {
-  var context = {'@vocab': 'http://schema.org/'}
-
   if (options.context) {
-    context = JSON.parse(fs.readFileSync(options.context).toString())
+    options.context = JSON.parse(fs.readFileSync(options.context).toString())
+  } else {
+    options.context = {'@vocab': 'http://schema.org/'}
   }
-
-  var vocab = {}
 
   if (options.vocab) {
-    vocab = JSON.parse(fs.readFileSync(options.vocab).toString())
+    options.vocab = JSON.parse(fs.readFileSync(options.vocab).toString())
   }
 
-  var callback = render.bind(null, options.template, context, vocab)
+  var callback = render.bind(null, options.template, options)
 
   callback.accept = 'application/ld+json'
 
   // add error renderer if options contain an error template
   if (options.templateError) {
-    callback.error = render.bind(null, options.templateError, context, vocab)
+    callback.error = render.bind(null, options.templateError, options)
   }
 
   return callback

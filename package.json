@@ -1,19 +1,18 @@
 {
   "name": "trifid-renderer-simple",
   "description": "Simple renderer for Trifid",
-  "version": "3.3.0",
+  "version": "3.2.1",
   "license": "MIT",
-  "homepage": "https://github.com/zazukoians/trifid-renderer-simple",
+  "homepage": "https://github.com/zazuko/trifid-renderer-simple",
   "repository": {
     "type": "git",
-    "url": "https://github.com/zazukoians/trifid-renderer-simple.git"
+    "url": "https://github.com/zazuko/trifid-renderer-simple.git"
   },
   "bugs": {
-    "url": "https://github.com/zazukoians/trifid-renderer-simple/issues"
+    "url": "https://github.com/zazuko/trifid-renderer-simple/issues"
   },
   "scripts": {
-    "lint": "standard *.js",
-    "test": "npm run lint"
+    "test": "standard"
   },
   "dependencies": {
     "jsonld": "^0.4.12"

@@ -32,6 +32,8 @@ ${include('cwd:views/footer.html')}
 
     if (statusCode === 404) {
       statusCodeElement.innerHTML = '404 Not Found'
+    } else if (statusCode === 413) {
+      statusCodeElement.innerHTML = '413 Request Entity Too Large'
     }
   }
 </script>
