@@ -1,54 +1,58 @@
-'use strict'
+const fs = require('fs')
+const jsonld = require('jsonld')
 
-var fs = require('fs')
-var jsonld = require('jsonld')
+class SimpleRenderer {
+  constructor (options) {
+    this.context = {'@vocab': 'http://schema.org/'}
+    this.vocab = {}
+    this.template = options.template
+    this.templateError = options.templateError
 
-function render (template, options, req, res) {
-  res.locals.statusCode = res.statusCode
-  res.locals.vocab = JSON.stringify(options.vocab || {})
+    if (options.context) {
+      this.context = JSON.parse(fs.readFileSync(options.context).toString())
+    }
 
-  try {
-    res.locals.graph = JSON.parse(res.locals.graph)
-  } catch (e) {
-    res.locals.graph = {}
+    if (options.vocab) {
+      // parse and stringify for compact form
+      this.vocab = JSON.stringify(JSON.parse(fs.readFileSync(options.vocab).toString()))
+    }
+
+    this.accept = 'application/ld+json'
   }
 
-  if (res.locals.jsonldContext) {
-    res.locals.graph['@context'] = res.locals.jsonldContext
+  render (req, res) {
+    this.renderTemplate(this.template, req, res)
   }
 
-  return jsonld.promises.compact(res.locals.graph, options.context).then(function (compacted) {
-    res.locals.graph = JSON.stringify(compacted)
+  error (req, res) {
+    // use error template if define otherwise template
+    this.renderTemplate(this.templateError || this.template, req, res)
+  }
 
-    res.render(template)
-  }).catch(function (err) {
-    console.error(err.stack || err.message)
+  renderTemplate (template, req, res) {
+    res.locals.statusCode = res.statusCode
+    res.locals.vocab = this.vocab
 
-    res.render(template)
-  })
+    let graph = {}
+
+    try {
+      graph = JSON.parse(res.locals.graph)
+    } catch (e) {}
+
+    if (res.locals.jsonldContext) {
+      graph['@context'] = res.locals.jsonldContext
+    }
+
+    jsonld.promises.compact(graph, this.context).then((compacted) => {
+      res.locals.graph = JSON.stringify(compacted)
+
+      res.render(template)
+    }).catch((err) => {
+      console.error(err.stack || err.message)
+
+      res.render(template)
+    })
+  }
 }
 
-function factory (options) {
-  if (options.context) {
-    options.context = JSON.parse(fs.readFileSync(options.context).toString())
-  } else {
-    options.context = {'@vocab': 'http://schema.org/'}
-  }
-
-  if (options.vocab) {
-    options.vocab = JSON.parse(fs.readFileSync(options.vocab).toString())
-  }
-
-  var callback = render.bind(null, options.template, options)
-
-  callback.accept = 'application/ld+json'
-
-  // add error renderer if options contain an error template
-  if (options.templateError) {
-    callback.error = render.bind(null, options.templateError, options)
-  }
-
-  return callback
-}
-
-module.exports = factory
+module.exports = SimpleRenderer
