@@ -4,7 +4,7 @@ const jsonld = require('jsonld')
 class SimpleRenderer {
   constructor (options) {
     this.context = {'@vocab': 'http://schema.org/'}
-    this.vocab = {}
+    this.vocab = '{}'
     this.template = options.template
     this.templateError = options.templateError
 
