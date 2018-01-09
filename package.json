@@ -1,7 +1,7 @@
 {
   "name": "trifid-renderer-simple",
   "description": "Simple renderer for Trifid",
-  "version": "3.2.2",
+  "version": "4.0.0",
   "license": "MIT",
   "homepage": "https://github.com/zazuko/trifid-renderer-simple",
   "repository": {
