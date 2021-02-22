@@ -210,12 +210,14 @@ function embeddedGraph (elementId) {
 
   return jsonld.promises.flatten(json, {}).then(function (flat) {
     return jsonld.promises.expand(flat).then(function (json) {
-      // if data contains quads, use the first graph
-      if (json.length && '@graph' in json[0]) {
-        json = json[0]['@graph']
-      }
+      // if data contains quads, merge them all together
+      return json.reduce(function (json, item) {
+        if (item['@graph']) {
+          return json.concat(item['@graph'])
+        }
 
-      return json
+        return json.concat(item)
+      }, [])
     })
   })
 }
