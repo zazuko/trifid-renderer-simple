@@ -1,9 +1,9 @@
-const fs = require('fs')
-const jsonld = require('jsonld')
+import fs from 'fs'
+import jsonld from 'jsonld'
 
 class SimpleRenderer {
   constructor (options) {
-    this.context = {'@vocab': 'http://schema.org/'}
+    this.context = { '@vocab': 'http://schema.org/' }
     this.vocab = '{}'
     this.template = options.template
     this.templateError = options.templateError
@@ -55,4 +55,4 @@ class SimpleRenderer {
   }
 }
 
-module.exports = SimpleRenderer
+export default SimpleRenderer
