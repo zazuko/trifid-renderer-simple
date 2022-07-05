@@ -1,6 +1,7 @@
 {
   "name": "trifid-renderer-simple",
   "description": "Simple renderer for Trifid",
+  "type": "module",
   "version": "5.0.1",
   "license": "MIT",
   "homepage": "https://github.com/zazuko/trifid-renderer-simple",
@@ -15,9 +16,9 @@
     "test": "standard"
   },
   "dependencies": {
-    "jsonld": "^0.4.12"
+    "jsonld": "^6.0.0"
   },
   "devDependencies": {
-    "standard": "^8.6.0"
+    "standard": "^15.0.1"
   }
 }
